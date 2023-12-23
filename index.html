@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Infinitely Growing Sierpinski Triangle</title>
+  <title>Infinite Sierpinski Triangle Nesting</title>
   <style>
     canvas {
       display: block;
@@ -30,8 +30,15 @@
         ctx.closePath();
         ctx.fillStyle = 'black';
         ctx.fill();
+
+        // Draw three smaller triangles inside the main triangle
+        const newSize = size / 2;
+        const newHeight = newSize * triangleHeight;
+        drawSierpinski(x, y - newHeight / 2, newSize, depth - 1);
+        drawSierpinski(x - newSize / 2, y + newHeight / 2, newSize, depth - 1);
+        drawSierpinski(x + newSize / 2, y + newHeight / 2, newSize, depth - 1);
       } else {
-        // Recursively draw three smaller triangles
+        // Recursively draw three smaller triangles inside each sub-triangle
         const newSize = size / 2;
         const newHeight = newSize * triangleHeight;
         drawSierpinski(x, y - newHeight / 2, newSize, depth - 1);
@@ -42,7 +49,7 @@
 
     function animate() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawSierpinski(canvas.width / 2, canvas.height / 1.5, initialSize, Math.floor(Date.now() / 1000) % 5);
+      drawSierpinski(canvas.width / 2, canvas.height / 1.5, initialSize, 4);
       requestAnimationFrame(animate);
     }
 
