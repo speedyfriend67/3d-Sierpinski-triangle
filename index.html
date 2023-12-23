@@ -3,55 +3,63 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Infinite Sierpinski Triangle Nesting</title>
-  <style>
-    canvas {
-      display: block;
-    }
-  </style>
+  <title>3D Infinite Sierpinski Triangle Nesting</title>
+  <script src="https://threejs.org/build/three.js"></script>
 </head>
 <body>
-  <canvas id="sierpinskiCanvas" width="800" height="800"></canvas>
   <script>
-    const canvas = document.getElementById('sierpinskiCanvas');
-    const ctx = canvas.getContext('2d');
+    // Set up scene
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
 
-    const triangleHeight = Math.sqrt(3) / 2;
-    const initialSize = 400;
+    // Create Sierpinski triangle geometry
+    const geometry = new THREE.TetrahedronGeometry(5, 0);
+    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
+    const sierpinskiTriangle = new THREE.Mesh(geometry, material);
+    scene.add(sierpinskiTriangle);
 
-    function drawSierpinski(x, y, size, depth) {
-      if (depth === 0) {
-        // Draw the equilateral triangle
-        const h = size * triangleHeight;
-        ctx.beginPath();
-        ctx.moveTo(x, y - h / 2);
-        ctx.lineTo(x - size / 2, y + h / 2);
-        ctx.lineTo(x + size / 2, y + h / 2);
-        ctx.closePath();
-        ctx.fillStyle = 'black';
-        ctx.fill();
+    // Set camera position
+    camera.position.z = 20;
 
-        // Draw three smaller triangles inside the main triangle
-        const newSize = size / 2;
-        const newHeight = newSize * triangleHeight;
-        drawSierpinski(x, y - newHeight / 2, newSize, depth - 1);
-        drawSierpinski(x - newSize / 2, y + newHeight / 2, newSize, depth - 1);
-        drawSierpinski(x + newSize / 2, y + newHeight / 2, newSize, depth - 1);
-      } else {
-        // Recursively draw three smaller triangles inside each sub-triangle
-        const newSize = size / 2;
-        const newHeight = newSize * triangleHeight;
-        drawSierpinski(x, y - newHeight / 2, newSize, depth - 1);
-        drawSierpinski(x - newSize / 2, y + newHeight / 2, newSize, depth - 1);
-        drawSierpinski(x + newSize / 2, y + newHeight / 2, newSize, depth - 1);
-      }
+    // Recursive function to create nested Sierpinski triangles
+    function createNestedTriangles(parent, depth) {
+      if (depth === 0) return;
+
+      // Create three sub-triangles inside the parent
+      const subTriangle1 = parent.clone();
+      const subTriangle2 = parent.clone();
+      const subTriangle3 = parent.clone();
+
+      // Position sub-triangles appropriately
+      subTriangle1.position.x -= 7;
+      subTriangle2.position.x += 7;
+      subTriangle3.position.z += 7;
+
+      // Add sub-triangles to the scene
+      scene.add(subTriangle1, subTriangle2, subTriangle3);
+
+      // Recursively create nested triangles for each sub-triangle
+      createNestedTriangles(subTriangle1, depth - 1);
+      createNestedTriangles(subTriangle2, depth - 1);
+      createNestedTriangles(subTriangle3, depth - 1);
     }
 
-    function animate() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawSierpinski(canvas.width / 2, canvas.height / 1.5, initialSize, 4);
+    // Create nested triangles with a specified depth
+    createNestedTriangles(sierpinskiTriangle, 3);
+
+    // Add animation
+    const animate = function () {
       requestAnimationFrame(animate);
-    }
+
+      // Rotate the entire structure
+      sierpinskiTriangle.rotation.x += 0.005;
+      sierpinskiTriangle.rotation.y += 0.005;
+
+      renderer.render(scene, camera);
+    };
 
     animate();
   </script>
