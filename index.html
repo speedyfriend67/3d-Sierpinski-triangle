@@ -3,37 +3,48 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Spinning 3D Sierpinski Triangle</title>
-  <script src="https://threejs.org/build/three.js"></script>
+  <title>Infinitely Growing Sierpinski Triangle</title>
+  <style>
+    canvas {
+      display: block;
+    }
+  </style>
 </head>
 <body>
+  <canvas id="sierpinskiCanvas" width="800" height="800"></canvas>
   <script>
-    // Set up scene
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
+    const canvas = document.getElementById('sierpinskiCanvas');
+    const ctx = canvas.getContext('2d');
 
-    // Create Sierpinski triangle geometry
-    const geometry = new THREE.TetrahedronGeometry(5, 0);
-    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
-    const sierpinskiTriangle = new THREE.Mesh(geometry, material);
-    scene.add(sierpinskiTriangle);
+    const triangleHeight = Math.sqrt(3) / 2;
+    const initialSize = 400;
 
-    // Set camera position
-    camera.position.z = 20;
+    function drawSierpinski(x, y, size, depth) {
+      if (depth === 0) {
+        // Draw the equilateral triangle
+        const h = size * triangleHeight;
+        ctx.beginPath();
+        ctx.moveTo(x, y - h / 2);
+        ctx.lineTo(x - size / 2, y + h / 2);
+        ctx.lineTo(x + size / 2, y + h / 2);
+        ctx.closePath();
+        ctx.fillStyle = 'black';
+        ctx.fill();
+      } else {
+        // Recursively draw three smaller triangles
+        const newSize = size / 2;
+        const newHeight = newSize * triangleHeight;
+        drawSierpinski(x, y - newHeight / 2, newSize, depth - 1);
+        drawSierpinski(x - newSize / 2, y + newHeight / 2, newSize, depth - 1);
+        drawSierpinski(x + newSize / 2, y + newHeight / 2, newSize, depth - 1);
+      }
+    }
 
-    // Add animation
-    const animate = function () {
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawSierpinski(canvas.width / 2, canvas.height / 1.5, initialSize, Math.floor(Date.now() / 1000) % 5);
       requestAnimationFrame(animate);
-
-      // Rotate the Sierpinski triangle
-      sierpinskiTriangle.rotation.x += 0.01;
-      sierpinskiTriangle.rotation.y += 0.01;
-
-      renderer.render(scene, camera);
-    };
+    }
 
     animate();
   </script>
